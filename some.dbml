@@ -1,0 +1,92 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table User {
+  id integer [primary key]
+  send_code integer
+  time_send timestamp
+  avatar image
+}
+
+
+Table Session {
+  id integer [primary key]
+  user integer
+  user_ip varchar
+  refresh_token varchar
+  device_type varchar
+  active bool
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+Table Task {
+  id integer [primary key]
+  created_at timestamp
+  updated_at timestamp
+  created_by integer
+  updated_by integer
+  title varchar
+  message varchar
+  date timestamp
+  completed timestamp
+}
+
+
+Table TaskReceiver {
+  id integer [primary key]
+  task integer
+  user integer
+}
+
+
+Table TaskReport {
+  id integer [primary key]
+  task integer
+  task_compeleted bool
+  total_receivers integer
+  successful integer
+  error_detail varchar
+}
+
+
+Table user {
+  id integer [primary key]
+  status varchar
+}
+
+Table video {
+  id integer [primary key]
+  created_by integer
+  title varchar
+  album image
+  video file
+  duration timestamp
+
+}
+
+
+Table WatchedVideo {
+    id integer [primary key]
+    user_id integer
+    video_id integer
+}
+
+
+
+
+Ref User: User.id < Session.user
+Ref User: User.id < Task.created_by
+Ref User: User.id < Task.updated_by
+Ref User: User.id < TaskReceiver.user
+// Ref User: User.id <> user.id
+
+Ref Task: Task.id < TaskReceiver.task
+Ref Task: Task.id < TaskReport.task
+
+
+Ref user: user.id < video.created_by
+
+Ref WatchedVideo: user.id < WatchedVideo.user_id
+Ref WatchedVideo: video.id < WatchedVideo.user_id
