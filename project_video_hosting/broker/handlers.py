@@ -1,8 +1,13 @@
-from broker.rabbit import Rabbit
-# from rabbit import Rabbit
+import time
 import pika
 
-connection_params = pika.ConnectionParameters('rabbit', credentials=pika.PlainCredentials('rabbitmq', 'rabbitmq'))
+from broker.rabbit import Rabbit
+# from rabbit import Rabbit
+
+time.sleep(10)
+
+credentials = pika.PlainCredentials('rabbitmq', 'rabbitmq')
+connection_params = pika.ConnectionParameters(host='rabbit', credentials=credentials)
 rabbit = Rabbit(connection_params)
 
 @rabbit.consume_messages(queue='registration', auto_ack=True)
@@ -14,7 +19,7 @@ def message_handler(ch, method, properties, body):
 #     print(f' [x] Received {body}') 
 
 
-rabbit.run()
+# rabbit.run()
 
 
 

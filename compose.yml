@@ -40,6 +40,7 @@ services:
     ports:
       - 9000:9000
       - 9001:9001
+
   createbuckets:
     image: minio/mc
     depends_on:
@@ -110,6 +111,9 @@ services:
     image: jwttask-video_hosting:latest
     command: python manage.py start_listener
     volumes:
-      - ./project_jwt/:/video_hosting_listener
+      - ./project_video_hosting/:/app
     depends_on:
+      - rabbit
       - video_hosting
+
+
