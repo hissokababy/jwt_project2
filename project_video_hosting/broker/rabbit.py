@@ -30,15 +30,21 @@ class Rabbit:
         print('message was sent')
 
 
-    def consume_messages(self, queue: str, auto_ack: bool = False):
+    def message_handler(self, queue: str, auto_ack: bool = False, exchange: str=None, routing_key: str=None):
         self.channel.queue_declare(queue=queue)
+
+        if exchange and routing_key:
+            self.channel.queue_bind(exchange=exchange, queue=queue, routing_key=routing_key)
 
         def decorator(func):
             self.channel.basic_consume(queue=queue, on_message_callback=func, auto_ack=auto_ack)
-            print(f'Consuming messages from queue {queue}')
+            print(f'Message handler for "{queue}" queue')
 
         return decorator
     
     def run(self):
         print('receiving messages...')
         self.channel.start_consuming()
+
+
+

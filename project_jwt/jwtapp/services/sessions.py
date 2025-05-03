@@ -2,13 +2,15 @@ import random
 
 from django.db.models import QuerySet
 from django.utils import timezone
-import pika
 
 from jwtapp.utils import send_user_message
 from jwtapp.tokens import decode_access_token, decode_refresh_token, generate_access_token, generate_refresh_token
 from jwtapp.models import Session, User
 from jwtapp.exeptions import InvalidCodeExeption, InvalidPasswordExeption, InvalidUserStatus, NoUserExists, InvalidSessionExeption
-from broker.rabbit import Rabbit
+from broker.configs import rabbit_connect
+from jwtapp.validators import MessageValidators
+
+message_validator = MessageValidators()
 
 def generate_user_tokens(token: str) -> dict:
     decoded = decode_refresh_token(token)
@@ -175,6 +177,12 @@ def validate_register_data(username: str, password: str, email: str, first_name:
     user.set_password(password)
     user.save()
 
+    rabbit = rabbit_connect(host='rabbit', username='rabbitmq', password='rabbitmq')
+    rabbit.create_exchange(exchange='video_hosting', exchange_type='direct')
+    body = message_validator.validate_user_id(id=user.pk)
+
+    rabbit.publish(exchange='video_hosting', routing_key='registration', body=body)
+
 
 def user_sessions(user: User) -> QuerySet[Session]:
     return Session.objects.filter(user=user, active=True)
@@ -266,14 +274,11 @@ def change_user_status(id: int, to_status: str) -> str:
     user.status = to_status.upper()[:2]
     user.save()
 
+    rabbit = rabbit_connect(host='rabbit', username='rabbitmq', password='rabbitmq')
 
-    connection_params = pika.ConnectionParameters(host='rabbit', credentials=pika.PlainCredentials('rabbitmq', 'rabbitmq'))
-    rabbit = Rabbit(connection_params)
+    rabbit.create_exchange(exchange='video_hosting', exchange_type='direct')
+    body = message_validator.validate_user_status(id=user.pk, status=user.status)
 
-    # rabbit.create_exchange(exchange='video_hosting', exchange_type='direct')
-    # rabbit.create_queue(queue='registration')
-    # rabbit.create_queue_bind(exchange='video_hosting', queue='registration', routing_key='register')
-
-    rabbit.publish(exchange='video_hosting', routing_key='register', body='some message')
+    rabbit.publish(exchange='video_hosting', routing_key='user_statuses', body=body)
 
     return f'Changed to {to_status.capitalize()}'
