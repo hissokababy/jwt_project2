@@ -7,7 +7,7 @@ from jwtapp.utils import send_user_message
 from jwtapp.tokens import decode_access_token, decode_refresh_token, generate_access_token, generate_refresh_token
 from jwtapp.models import Session, User
 from jwtapp.exeptions import InvalidCodeExeption, InvalidPasswordExeption, InvalidUserStatus, NoUserExists, InvalidSessionExeption
-from broker.configs import rabbit_connect
+from broker.configs import rabbit
 from jwtapp.validators import MessageValidators
 
 message_validator = MessageValidators()
@@ -177,11 +177,10 @@ def validate_register_data(username: str, password: str, email: str, first_name:
     user.set_password(password)
     user.save()
 
-    rabbit = rabbit_connect(host='rabbit', username='rabbitmq', password='rabbitmq')
     rabbit.create_exchange(exchange='video_hosting', exchange_type='direct')
     body = message_validator.validate_user_id(id=user.pk)
 
-    rabbit.publish(exchange='video_hosting', routing_key='registration', body=body)
+    rabbit.publish(exchange='video_hosting', routing_key='registration', body=body, queue='user_statuses')
 
 
 def user_sessions(user: User) -> QuerySet[Session]:
@@ -274,11 +273,9 @@ def change_user_status(id: int, to_status: str) -> str:
     user.status = to_status.upper()[:2]
     user.save()
 
-    rabbit = rabbit_connect(host='rabbit', username='rabbitmq', password='rabbitmq')
-
     rabbit.create_exchange(exchange='video_hosting', exchange_type='direct')
     body = message_validator.validate_user_status(id=user.pk, status=user.status)
 
-    rabbit.publish(exchange='video_hosting', routing_key='user_statuses', body=body)
+    rabbit.publish(exchange='video_hosting', routing_key='user_statuses', body=body, queue='user_statuses')
 
     return f'Changed to {to_status.capitalize()}'

@@ -1,50 +1,63 @@
-from typing import Any
 import pika
+from typing import Any
+from pika.exceptions import AMQPConnectionError
 from pika.exchange_type import ExchangeType
+from pika.adapters.blocking_connection import BlockingChannel
 
 
 class Rabbit:
     def __init__(self, connection_params: pika.ConnectionParameters):
+        self.connection_params = connection_params
+        self.message_handlers = []
 
-        self.connection = pika.BlockingConnection(
-            connection_params)
-        self.channel = self.connection.channel()
+    def channel(self) -> BlockingChannel:
+        connection = pika.BlockingConnection(
+            self.connection_params)
+        channel = connection.channel()
+        return channel
 
 
     def create_queue(self, queue: Any, passive: bool=False, durable: bool=False, 
-                     exclusive: bool=False, auto_delete: bool=False, arguments: Any=None):
-        self.channel.queue_declare(queue, passive, durable, 
+                     exclusive: bool=False, auto_delete: bool=False, arguments: Any=None, 
+                     exchange: Any=None, routing_key: Any=None, bind_args: Any=None):
+        
+        res = self.channel().queue_declare(queue, passive, durable, 
                      exclusive, auto_delete, arguments)
-        print(f'connection was set, queue {queue} created')
+        queue_name = res.method.queue
+        
+        if exchange and routing_key:
+            self.channel().queue_bind(queue=queue_name, exchange=exchange, routing_key=routing_key, arguments=bind_args)
+        print(f'connection was set, queue {queue_name} created')
+        return queue_name
 
 
     def create_exchange(self, exchange: str, exchange_type: ExchangeType|str, passive: bool=False, durable: bool=False, 
                         auto_delete: bool=False, internal: bool=False, arguments=None):
-        self.channel.exchange_declare(exchange, exchange_type, passive, durable, 
+        self.channel().exchange_declare(exchange, exchange_type, passive, durable, 
                         auto_delete, internal, arguments)
 
-    def publish(self, exchange: str, routing_key: str, body: str, properties=None, 
-                mandatory: bool=False):
-        
-        self.channel.basic_publish(exchange, routing_key, body, properties, mandatory)
-        print('message was sent')
 
-
-    def message_handler(self, queue: str, auto_ack: bool = False, exchange: str=None, routing_key: str=None):
-        self.channel.queue_declare(queue=queue)
-
-        if exchange and routing_key:
-            self.channel.queue_bind(exchange=exchange, queue=queue, routing_key=routing_key)
-
+    def message_handler(self, queue: str, auto_ack: bool=False, exclusive: bool=False, consumer_tag:Any=None, arguments:Any=None):
         def decorator(func):
-            self.channel.basic_consume(queue=queue, on_message_callback=func, auto_ack=auto_ack)
-            print(f'Message handler for "{queue}" queue')
+            
+            handler = {
+                'queue': queue,
+                'on_message_callback': func,
+                'auto_ack': auto_ack,
+                'exclusive': exclusive,
+                'consumer_tag': consumer_tag,
+                'arguments': arguments
+            }
 
+            self.message_handlers.append(handler)
+            return func
         return decorator
-    
+
+
     def run(self):
-        print('receiving messages...')
-        self.channel.start_consuming()
+        with self.channel() as channel:
+            for message_handler in self.message_handlers:
+                channel.basic_consume(**message_handler)
 
-
+            channel.start_consuming()
 

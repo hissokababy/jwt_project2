@@ -1,11 +1,12 @@
 from django.core.management.base import BaseCommand
 
-from broker import handlers
+from broker.handlers import rabbit
 
 
 class Command(BaseCommand):
     
     def handle(self, *args, **options):
-        print("fsdfsdf")
-        handlers.rabbit.run()
+        print('listening...')
+        rabbit.run()
+
 

@@ -1,24 +1,19 @@
-import time
 import pika
 
 from broker.rabbit import Rabbit
-# from rabbit import Rabbit
-time.sleep(10)
 
-credentials = pika.PlainCredentials('rabbitmq', 'rabbitmq')
-connection_params = pika.ConnectionParameters(host='rabbit', credentials=credentials)
-rabbit = Rabbit(connection_params)
+credentials = pika.PlainCredentials(username='rabbitmq', password='rabbitmq')
+rabbit = Rabbit(pika.ConnectionParameters(host='rabbit', credentials=credentials, connection_attempts=5))
 
-rabbit.create_exchange(exchange='video_hosting', exchange_type='direct')
+rabbit.create_exchange(exchange='test', exchange_type='direct')
+test_queue = rabbit.create_queue(queue='', exchange='test', routing_key='test')
 
 
-@rabbit.message_handler(queue='user_statuses', auto_ack=True, 
-                         exchange='video_hosting', routing_key='user_statuses')
+@rabbit.message_handler(queue=test_queue, auto_ack=True)
 def user_status_handler(ch, method, properties, body):
-    print(f' [x] Received {body}')
+    print(f'status handler: [x] Received {body}')
 
 
-@rabbit.message_handler(queue='registration', auto_ack=True, 
-                         exchange='video_hosting', routing_key='registration')
-def user_registration_handler(ch, method, properties, body):
-    print(f' [x] Received {body}')
+
+
+
