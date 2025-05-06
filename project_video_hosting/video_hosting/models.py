@@ -8,6 +8,7 @@ class CommonInfo(models.Model):
 
     class Meta:
         abstract = True
+        
 class UserStatus(models.TextChoices):
     ACTIVE = 'AC', ""
     INACTIVE = 'IN', ""

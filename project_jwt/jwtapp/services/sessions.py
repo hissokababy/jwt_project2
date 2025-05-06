@@ -177,10 +177,9 @@ def validate_register_data(username: str, password: str, email: str, first_name:
     user.set_password(password)
     user.save()
 
-    rabbit.create_exchange(exchange='video_hosting', exchange_type='direct')
     body = message_validator.validate_user_id(id=user.pk)
 
-    rabbit.publish(exchange='video_hosting', routing_key='registration', body=body, queue='user_statuses')
+    rabbit.publish(exchange='video_hosting_exchange', routing_key='user_register', body=body)
 
 
 def user_sessions(user: User) -> QuerySet[Session]:
@@ -273,9 +272,8 @@ def change_user_status(id: int, to_status: str) -> str:
     user.status = to_status.upper()[:2]
     user.save()
 
-    rabbit.create_exchange(exchange='video_hosting', exchange_type='direct')
     body = message_validator.validate_user_status(id=user.pk, status=user.status)
 
-    rabbit.publish(exchange='video_hosting', routing_key='user_statuses', body=body, queue='user_statuses')
+    rabbit.publish(exchange='video_hosting_exchange', routing_key='user_status', body=body)
 
     return f'Changed to {to_status.capitalize()}'

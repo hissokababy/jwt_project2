@@ -13,7 +13,7 @@ from mailing_app.models import Task, TaskReceiver, TaskReport
 from mailing_app.exeptions import NoTaskExist, ReceiverIdError, InvalidTaskDate
 
 class MailingService:
-    def __init__(self, user: User = None):
+    def __init__(self, user: User=None):
         self.user = user
 
     def get_task(self, pk: int) -> dict:
