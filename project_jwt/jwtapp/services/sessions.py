@@ -6,7 +6,7 @@ from django.utils import timezone
 from jwtapp.utils import send_user_message
 from jwtapp.tokens import decode_access_token, decode_refresh_token, generate_access_token, generate_refresh_token
 from jwtapp.models import Session, User
-from jwtapp.exeptions import InvalidCodeExeption, InvalidPasswordExeption, InvalidUserStatus, NoUserExists, InvalidSessionExeption
+from jwtapp.exeptions import InvalidCodeExeption, InvalidPasswordExeption, NoUserExists, InvalidSessionExeption
 from broker.configs import rabbit
 from jwtapp.validators import MessageValidators
 
@@ -180,7 +180,7 @@ def validate_register_data(username: str, password: str, email: str, first_name:
     body = message_validator.validate_user_id(id=user.pk)
 
     rabbit.publish(exchange='video_hosting_exchange', routing_key='user_register', body=body)
-
+    
 
 def user_sessions(user: User) -> QuerySet[Session]:
     return Session.objects.filter(user=user, active=True)
@@ -259,21 +259,17 @@ def create_user_session(user: User, refresh_token: str) -> Session:
     return session
 
 
-def change_user_status(id: int, to_status: str) -> str:
+def change_user_activity(id: int, active: bool) -> str:
     try:
         user = User.objects.get(pk=id)
-        statuses = list(User.STATUS_CHOICES.values())
-        if not to_status.capitalize() in statuses:
-                raise InvalidUserStatus(f'Status is incorrect please choose one of theese: {statuses}')   
-
     except User.DoesNotExist:
         raise NoUserExists
 
-    user.status = to_status.upper()[:2]
+    user.is_active = active
     user.save()
 
-    body = message_validator.validate_user_status(id=user.pk, status=user.status)
+    body = message_validator.validate_user_activity(id=user.pk, active=user.is_active)
 
-    rabbit.publish(exchange='video_hosting_exchange', routing_key='user_status', body=body)
+    rabbit.publish(exchange='video_hosting_exchange', routing_key='user_activity', body=body)
 
-    return f'Changed to {to_status.capitalize()}'
+    return f'Changed to Active == {active}'

@@ -5,20 +5,10 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 class User(AbstractUser):
-    ACTIVE = 'AC'
-    INACTIVE = 'IN'
-    BLOCKED = 'BL'
-
-    STATUS_CHOICES = {
-        ACTIVE: 'Active',
-        INACTIVE: 'Inactive',
-        BLOCKED: 'Blocked'
-    }
-
     send_code = models.IntegerField(verbose_name='Код подтверждения', blank=True, null=True)
     time_send = models.DateTimeField(verbose_name='Дата отправки кода', blank=True, null=True)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
-    status = models.CharField(choices=STATUS_CHOICES, default='Active', max_length=50)
+    is_active = models.BooleanField(verbose_name='Активность пользователя', default=True)
 
     def __str__(self):
         return f'Пользователь {self.pk} {self.status}'

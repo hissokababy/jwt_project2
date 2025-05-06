@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
-from video_hosting.exeptions import InvalidUserStatus
+from video_hosting.exeptions import InvalidUserActivity
 
 
-class Status(BaseModel):
+class UserActivity(BaseModel):
     id: int
-    status: str
+    active: bool
 
 
 class UserId(BaseModel):
@@ -15,17 +15,17 @@ class UserId(BaseModel):
 class ValidateMessage:
     
     @classmethod
-    def validate_status(cls, body: str) -> Status:
+    def validate_activity(cls, body: str) -> UserActivity:
         try:
-            message = Status.model_validate_json(body)
+            message = UserActivity.model_validate_json(body)
             return message
         except Exception as e:
-            raise InvalidUserStatus(e)
+            raise InvalidUserActivity(e)
         
     @classmethod
-    def validate_user_id(cls, body: str) -> Status:
+    def validate_user_id(cls, body: str) -> UserId:
         try:
             message = UserId.model_validate_json(body)
             return message
         except Exception as e:
-            raise InvalidUserStatus(e)
+            raise InvalidUserActivity(e)

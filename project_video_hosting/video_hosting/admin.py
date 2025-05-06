@@ -16,7 +16,7 @@ class WatchedVideoInline(admin.TabularInline):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'status']
+    list_display = ['id', 'is_active']
     inlines = [VideoInline,]
 
 @admin.register(Video)

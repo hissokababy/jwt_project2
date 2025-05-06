@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 
 from jwtapp.models import User
-from jwtapp.serializers import (ChangeProfilePhotoSerializer, ChangeUserStatusSerializer, CheckVerificationCodeSerializer, CloseAllSessionsSerializer, 
+from jwtapp.serializers import (ChangeProfilePhotoSerializer, ChangeUserActivitySerializer, CheckVerificationCodeSerializer, CloseAllSessionsSerializer, 
                                 CloseSessionByCredentialsSerializer, CloseSessionSerializer, LoginSerializer, 
                                 MySessionsSerializer, PasswordResetSerializer, RefreshTokenSerializer, 
                                 RegisterSerializer, ResponseCloseSessionSerializer, ResponseLoginSerializer, 
@@ -16,7 +16,7 @@ from jwtapp.serializers import (ChangeProfilePhotoSerializer, ChangeUserStatusSe
 
 from jwtapp.authentication import JWTAuthentication
 
-from jwtapp.services.sessions import (auth_user, change_user_status, close_session_by_credentials, close_session_by_id, close_session_by_token, close_sessions, 
+from jwtapp.services.sessions import (auth_user, change_user_activity, close_session_by_credentials, close_session_by_id, close_session_by_token, close_sessions, 
                                     generate_user_tokens, send_code_to_user, set_user_photo, user_sessions, validate_code, 
                                     validate_register_data,)
 from jwtapp.utils import edit_photo
@@ -198,11 +198,11 @@ class SessionLogoutView(APIView):
 
 # Работа с пользователем
 @extend_schema(tags=["User"])
-class ChangeUserStatusView(APIView):
+class ChangeUserActivityView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, format=None):
-        serializer = ChangeUserStatusSerializer(data=request.data)
+        serializer = ChangeUserActivitySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user_status = change_user_status(serializer.validated_data.get('id'), serializer.validated_data.get('status'))
+        user_status = change_user_activity(serializer.validated_data.get('id'), serializer.validated_data.get('active'))
         return Response(user_status, status=status.HTTP_200_OK)

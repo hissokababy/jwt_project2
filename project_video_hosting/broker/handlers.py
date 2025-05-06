@@ -10,25 +10,23 @@ rabbit = Rabbit(pika.ConnectionParameters(host='rabbit', credentials=credentials
 
 
 rabbit.create_exchange(exchange='video_hosting_exchange', exchange_type='direct')
-user_status_queue = rabbit.create_queue(queue='', exchange='video_hosting_exchange', routing_key='user_status')
+user_activity_queue = rabbit.create_queue(queue='', exchange='video_hosting_exchange', routing_key='user_activity')
 user_register_queue = rabbit.create_queue(queue='', exchange='video_hosting_exchange', routing_key='user_register')
 
 
 service = VideoHostingService()
 
 
-@rabbit.message_handler(queue=user_status_queue, auto_ack=True)
-def user_status_handler(ch, method, properties, body):
-    message = ValidateMessage.validate_status(body)
+@rabbit.message_handler(queue=user_activity_queue, auto_ack=True)
+def user_activity_handler(ch, method, properties, body):
+    message = ValidateMessage.validate_activity(body)
 
-    service.change_user_status(message.id, message.status)
+    service.change_user_activity(message.id, message.active)
 
 
 @rabbit.message_handler(queue=user_register_queue, auto_ack=True)
 def user_register_handler(ch, method, properties, body):
     message = ValidateMessage.validate_user_id(body)
-
-    print(message.id)
     service.register_user(message.id)
 
 

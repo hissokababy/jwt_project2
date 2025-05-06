@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 
-from jwtapp.exeptions import InvalidUserStatus
+from jwtapp.exeptions import InvalidUserActivity
 
-class Status(BaseModel):
+class UserActivity(BaseModel):
     id: int
-    status: str
+    active: bool
 
 class UserId(BaseModel):
     id: int
@@ -14,18 +14,18 @@ class MessageValidators:
     def __init__(self):
         pass
 
-    def validate_user_status(self, id: int, status: str) -> str:
+    def validate_user_activity(self, id: int, active: bool) -> str:
         try:
-            body = Status(id=id, status=status).model_dump_json()
+            body = UserActivity(id=id, active=active).model_dump_json()
             return body
         except Exception as e:
-            raise InvalidUserStatus(e)
+            raise InvalidUserActivity(e)
 
     def validate_user_id(self, id: int) -> str:
         try:
             body = UserId(id=id).model_dump_json()
             return body
         except Exception as e:
-            raise InvalidUserStatus(e)
+            raise InvalidUserActivity(e)
         
     

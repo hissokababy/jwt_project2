@@ -8,25 +8,10 @@ class CommonInfo(models.Model):
 
     class Meta:
         abstract = True
-        
-class UserStatus(models.TextChoices):
-    ACTIVE = 'AC', ""
-    INACTIVE = 'IN', ""
-    BLOCKED = 'BL', ""
 
 class User(CommonInfo):
-    ACTIVE = 'AC'
-    INACTIVE = 'IN'
-    BLOCKED = 'BL'
-
-    STATUS_CHOICES = {
-        ACTIVE: 'Active',
-        INACTIVE: 'Inactive',
-        BLOCKED: 'Blocked'
-    }
-    
     id = models.PositiveIntegerField(verbose_name='Ид пользователя', primary_key=True)
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=ACTIVE)
+    is_active = models.BooleanField(verbose_name='Активность пользователя', default=True)
 
     def __str__(self):
         return f'Пользователь {self.id}'

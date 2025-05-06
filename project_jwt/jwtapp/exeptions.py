@@ -29,7 +29,7 @@ class InvalidPasswordExeption(APIException):
     default_detail = ('Invalid password.')
     default_code = 'invalid_password'
 
-class InvalidUserStatus(APIException):
+class InvalidUserActivity(APIException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     default_detail = ('invalid status')
     default_code = 'invalid_status'

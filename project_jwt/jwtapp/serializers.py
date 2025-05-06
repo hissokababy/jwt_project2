@@ -83,6 +83,6 @@ class ChangeProfilePhotoSerializer(serializers.Serializer):
 
 
 # Работа с пользователем
-class ChangeUserStatusSerializer(serializers.Serializer):
+class ChangeUserActivitySerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    status = serializers.CharField()
+    active = serializers.CharField()
