@@ -1,31 +1,19 @@
 from pydantic import BaseModel
 
-from video_hosting.exeptions import InvalidUserActivity
+from video_hosting.exeptions import InvalidUserId
 
 
-class UserActivity(BaseModel):
+class UserMessage(BaseModel):
     id: int
-    active: bool
-
-
-class UserId(BaseModel):
-    id: int
+    active: bool | None = True
 
 
 class ValidateMessage:
-    
-    @classmethod
-    def validate_activity(cls, body: str) -> UserActivity:
-        try:
-            message = UserActivity.model_validate_json(body)
-            return message
-        except Exception as e:
-            raise InvalidUserActivity(e)
         
     @classmethod
-    def validate_user_id(cls, body: str) -> UserId:
+    def validate_user_id(cls, body: str) -> UserMessage:
         try:
-            message = UserId.model_validate_json(body)
+            message = UserMessage.model_validate_json(body)
             return message
         except Exception as e:
-            raise InvalidUserActivity(e)
+            raise InvalidUserId(e)

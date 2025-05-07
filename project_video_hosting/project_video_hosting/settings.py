@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+# from dotenv import load_dotenv
+# load_dotenv('project_video_hosting/.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,6 +45,8 @@ INSTALLED_APPS = [
     'broker',
 
     'rest_framework',
+    'drf_spectacular',
+    'django_cleanup.apps.CleanupConfig',
 
 ]
 
@@ -118,6 +122,31 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        # 'jwtapp.authentication.JWTAuthentication',
+    ]
+}
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'VideoHosting Service API',
+    'DESCRIPTION': 'Your project description',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
@@ -141,5 +170,28 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
+}
+
+
+AWS_ACCESS_KEY_ID = os.getenv("ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("STORAGE_BUCKET_NAME")
+AWS_S3_ENDPOINT_URL = os.getenv("S3_ENDPOINT_URL")
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = True
+AWS_S3_FILE_OVERWRITE = False
+AWS_S3_URL_PROTOCOL = "http:"
+AWS_S3_CUSTOM_DOMAIN = "localhost:9000/videos"
+
+
 RABBITMQ_DEFAULT_USER = "rabbitmq"
 RABBITMQ_DEFAULT_PASS = "rabbitmq"
+
+

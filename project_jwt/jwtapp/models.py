@@ -11,7 +11,7 @@ class User(AbstractUser):
     is_active = models.BooleanField(verbose_name='Активность пользователя', default=True)
 
     def __str__(self):
-        return f'Пользователь {self.pk} {self.status}'
+        return f'Пользователь {self.pk} {self.is_active}'
 
 class CommonInfo(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания', blank=True, null=True)
