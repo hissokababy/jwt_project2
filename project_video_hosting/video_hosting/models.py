@@ -11,7 +11,7 @@ class CommonInfo(models.Model):
 
 class User(CommonInfo):
     id = models.PositiveIntegerField(verbose_name='Ид пользователя', primary_key=True)
-    is_active = models.BooleanField(verbose_name='Активность пользователя', default=True)
+    is_active = models.BooleanField(verbose_name='Активный пользователь', default=True)
 
     def __str__(self):
         return f'Пользователь {self.id}'

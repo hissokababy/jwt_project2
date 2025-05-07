@@ -179,7 +179,7 @@ def validate_register_data(username: str, password: str, email: str, first_name:
 
     body = message_validator.validate_user_id(id=user.pk)
 
-    rabbit.publish(exchange='video_hosting_exchange', routing_key='user_register', body=body)
+    rabbit.publish(exchange='video_hosting_exchange', routing_key='user', body=body)
     
 
 def user_sessions(user: User) -> QuerySet[Session]:
@@ -270,6 +270,6 @@ def change_user_activity(id: int, active: bool) -> str:
 
     body = message_validator.validate_user_activity(id=user.pk, active=user.is_active)
 
-    rabbit.publish(exchange='video_hosting_exchange', routing_key='user_activity', body=body)
+    rabbit.publish(exchange='video_hosting_exchange', routing_key='user', body=body)
 
-    return f'Changed to Active == {active}'
+    return f'Changed to {active}'
