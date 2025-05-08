@@ -25,10 +25,12 @@ class Video(CommonInfo):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='videos', 
                                    verbose_name='Автор видео')
     title = models.CharField(max_length=255, verbose_name='Название видео')
-    preview = models.ImageField(upload_to='video/previews', verbose_name='Обложка видео')
+    preview = models.ImageField(upload_to='videos/previews/', verbose_name='Обложка видео')
     video = models.FileField(upload_to='videos/', verbose_name='Видео')
     duration = models.DurationField(verbose_name='Длительность видео')
 
+    processed = models.BooleanField(default=False, verbose_name='Обработано')
+    master_playlist = models.FileField(upload_to='video/master_playlists/', verbose_name='Мастер плейлист', null=True)
 
     def __str__(self):
         return f'Видео {self.pk}, Автор {self.created_by}'
@@ -38,10 +40,11 @@ class Video(CommonInfo):
         verbose_name_plural = 'Видео'
     
 
-class WatchedVideo(CommonInfo):
-    viewer = models.ForeignKey(User, on_delete=models.DO_NOTHING, verbose_name='Зритель', blank=True, null=True)
-    video_id = models.ForeignKey(Video, on_delete=models.CASCADE, verbose_name='Видео')
-    watching_at = models.PositiveIntegerField(verbose_name='Точка просмотра видео', null=True)
+class VideoTracker(CommonInfo):
+    viewer = models.ForeignKey(User, on_delete=models.DO_NOTHING, verbose_name='Зритель', blank=True, null=True, related_name='watched_videos')
+    video_id = models.ForeignKey(Video, on_delete=models.CASCADE, verbose_name='Видео', related_name='viewers')
+    seconds = models.PositiveIntegerField(verbose_name='Точка просмотра видео', default=0)
+
 
     def __str__(self):
         return f'Видео {self.video_id}, Зритель {self.viewer}'
@@ -49,3 +52,11 @@ class WatchedVideo(CommonInfo):
     class Meta:
         verbose_name = 'Просмотренное Видео'
         verbose_name_plural = 'Просмотренное Видео'
+
+
+class VideoVariant(CommonInfo):
+    master = models.ForeignKey(Video, on_delete=models.CASCADE, related_name='variants', null=True)
+    playlist_file = models.FileField(upload_to='videos/variants/', null=True, verbose_name='Варианты видео')
+    resolution = models.PositiveIntegerField(verbose_name='Разрешение')
+
+

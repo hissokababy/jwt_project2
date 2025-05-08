@@ -5,3 +5,8 @@ class InvalidUserId(APIException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     default_detail = ('invalid id')
     default_code = 'invalid_user_id'
+
+class InvalidVideoId(APIException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    default_detail = ('invalid video id')
+    default_code = 'invalid_video_id'

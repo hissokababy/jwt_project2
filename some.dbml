@@ -63,14 +63,22 @@ Table video {
   album image
   video file
   duration timestamp
+  processed bool
+  master_playlist file
 
 }
 
+Table VideoVariant {
+  master integer    
+  playlist_file file
+  resolution integer
+}
 
-Table WatchedVideo {
-    id integer [primary key]
+
+Table VideoTracker {
     user_id integer
     video_id integer
+    seconds integer
 }
 
 
@@ -88,5 +96,8 @@ Ref Task: Task.id < TaskReport.task
 
 Ref user: user.id < video.created_by
 
-Ref WatchedVideo: user.id < WatchedVideo.user_id
-Ref WatchedVideo: video.id < WatchedVideo.user_id
+Ref video: video.id < VideoVariant.master
+
+Ref VideoTracker: user.id < VideoTracker.user_id
+Ref VideoTracker: video.id < VideoTracker.user_id
+

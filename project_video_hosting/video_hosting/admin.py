@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from video_hosting.models import User, Video, WatchedVideo
+from video_hosting.models import User, Video, VideoTracker
 
 # Register your models here.
 
@@ -9,18 +9,21 @@ class VideoInline(admin.TabularInline):
     extra = 1
     model = Video
 
-class WatchedVideoInline(admin.TabularInline):
-    fk_name = 'video_id'
+
+class VideoTrackerInline(admin.TabularInline):
+    fk_name = 'viewer'
     extra = 1
-    model = WatchedVideo
+    model = VideoTracker
+
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ['id', 'is_active']
-    inlines = [VideoInline,]
+    inlines = [VideoInline, VideoTrackerInline]
+
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'created_by', 'duration', 'created_at']
-    inlines = [WatchedVideoInline,]
+    list_display_links = ['id', 'title']
+    list_display = ['id', 'title', 'created_by']
     
