@@ -122,6 +122,3 @@ services:
       - ./project_video_hosting/:/app
     env_file:
       - ./project_video_hosting/.env
-
-
-

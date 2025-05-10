@@ -195,3 +195,13 @@ RABBITMQ_DEFAULT_USER = "rabbitmq"
 RABBITMQ_DEFAULT_PASS = "rabbitmq"
 
 
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+CELERY_WORKER_TIME_INTERVAL = 300.0
+
+VIDEO_RESOLUTIONS = {
+    '360p': '640x360',
+    '480p': '854x480',
+    '720p': '1280x720',
+    '1080p': '1920x1080'
+}

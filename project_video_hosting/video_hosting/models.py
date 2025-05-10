@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 
+
 class CommonInfo(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
@@ -26,11 +27,11 @@ class Video(CommonInfo):
                                    verbose_name='Автор видео')
     title = models.CharField(max_length=255, verbose_name='Название видео')
     preview = models.ImageField(upload_to='videos/previews/', verbose_name='Обложка видео')
-    video = models.FileField(upload_to='videos/', verbose_name='Видео')
+    video = models.FileField(upload_to='videos/original_files/', verbose_name='Видео')
     duration = models.DurationField(verbose_name='Длительность видео')
 
     processed = models.BooleanField(default=False, verbose_name='Обработано')
-    master_playlist = models.FileField(upload_to='video/master_playlists/', verbose_name='Мастер плейлист', null=True)
+    master_playlist = models.FileField(upload_to=f'videos/master_playlists/', verbose_name='Мастер плейлист', null=True)
 
     def __str__(self):
         return f'Видео {self.pk}, Автор {self.created_by}'
@@ -53,10 +54,5 @@ class VideoTracker(CommonInfo):
         verbose_name = 'Просмотренное Видео'
         verbose_name_plural = 'Просмотренное Видео'
 
-
-class VideoVariant(CommonInfo):
-    master = models.ForeignKey(Video, on_delete=models.CASCADE, related_name='variants', null=True)
-    playlist_file = models.FileField(upload_to='videos/variants/', null=True, verbose_name='Варианты видео')
-    resolution = models.PositiveIntegerField(verbose_name='Разрешение')
 
 

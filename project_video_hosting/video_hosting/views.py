@@ -17,12 +17,14 @@ class LoadVideoView(APIView):
         serializer = LoadVideoSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        video = self.service.create_video(user=request.user, 
-                                          title=serializer.validated_data.get('title'),
-                                          preview=serializer.validated_data.get('preview'), 
-                                          video=serializer.validated_data.get('video'),
-                                          duration=serializer.validated_data.get('duration'))
+        # video = self.service.create_video(user=request.user, 
+        #                                   title=serializer.validated_data.get('title'),
+        #                                   preview=serializer.validated_data.get('preview'), 
+        #                                   video=serializer.validated_data.get('video'),
+        #                                   duration=serializer.validated_data.get('duration'))
         
+        self.service.process_video()
+
         return Response(status=status.HTTP_202_ACCEPTED)
     
 

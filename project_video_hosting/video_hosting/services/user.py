@@ -1,9 +1,11 @@
 from typing import IO
+from pathlib import Path
+
+from django.core.files import File
 
 from video_hosting.serializers import LoadVideoSerializer
 from video_hosting.models import User, Video
 from video_hosting.exeptions import InvalidVideoId
-
 
 
 class VideoHostingService:
@@ -21,7 +23,8 @@ class VideoHostingService:
     ###### ---->>>>>   РАБОТА С ВИДЕО   <<<<<---- ######
 
     def create_video(self, user: User, title: str, preview: IO, video: IO, duration: int) -> None:
-        user = User.objects.get(pk=21)   # временно     
+        user = User.objects.get(pk=21)   # временно    
+
         video = Video.objects.create(created_by=user, title=title, 
                                      preview=preview, video=video, duration=duration)
 
@@ -35,4 +38,26 @@ class VideoHostingService:
         except Video.DoesNotExist:
             raise InvalidVideoId
         
+    
+    def process_video(self):
+        videos = Video.objects.filter(processed=False)
+
+        if not videos.exists():
+            pass
+        
+        ### создаем мастер плейлист ###
+        video = Video.objects.get(pk=2)
+        path = Path('project_video_hosting/master.m3u8')
+
+        with path.open(mode='rb') as f:
+            video.master_playlist = File(f, name='master.m3u8')
+            video.save()
+        ### создаем мастер плейлист ###
+
+        
+        
+
+
     ###### ---->>>>>   РАБОТА С ВИДЕО   <<<<<---- ######
+
+
