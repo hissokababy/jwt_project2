@@ -39,7 +39,7 @@ class VideoHostingService:
         
     
     def process_video(self, input_file: str, resolutions: list, file_name: str, video_id: int):
-
+        
         master = self.video_process.create_hls(input_file=input_file, resolutions=resolutions, file_name=file_name)
 
         video = Video.objects.get(pk=video_id)

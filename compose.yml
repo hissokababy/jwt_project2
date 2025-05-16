@@ -72,19 +72,12 @@ services:
   redis:
     image: redis:alpine
 
-  redis_video_hosting:
-    image: redis:alpine
-
-    command: --port 6380
-    ports:
-      - "6380:6380"
-
 
   celery:
     build: ./project_jwt/
     command: celery -A project_jwt worker -l info
     volumes:
-      - ./project_jwt/:/redis
+      - ./project_jwt/:/app
     depends_on:
       - redis
 
@@ -92,15 +85,17 @@ services:
     build: ./project_video_hosting/
     command: celery -A project_video_hosting worker -l info
     volumes:
-      - ./project_video_hosting/:/redis_video_hosting
+      - ./project_video_hosting/:/app
     depends_on:
-      - redis_video_hosting
+      - redis
+    env_file:
+      - ./project_video_hosting/.env
 
   celery-beat:
     build: ./project_jwt/
     command: celery -A project_jwt beat -l info
     volumes:
-      - ./project_jwt/:/celery
+      - ./project_jwt/:/app
     depends_on:
       - redis
 
@@ -113,8 +108,17 @@ services:
       - FLOWER_PORT=8888
     ports:
     - 8888:8888
-    volumes:
-      - ./project_jwt/:/flower_data
+
+
+  flower_video_hosting:
+    image: mher/flower
+    container_name: flower_video_hosting
+    command: celery flower --persisten=True
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - FLOWER_PORT=8889
+    ports:
+    - 8889:8889
   
   rabbit:
     image: rabbitmq:4-management

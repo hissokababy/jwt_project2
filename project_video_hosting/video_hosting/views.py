@@ -6,6 +6,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 
+from video_hosting.tasks import process_video_task
 from video_hosting.serializers import LoadVideoSerializer
 from video_hosting.services.user import VideoHostingService
 # Create your views here.
@@ -25,7 +26,7 @@ class LoadVideoView(APIView):
                                           video=serializer.validated_data.get('video'),
                                           duration=serializer.validated_data.get('duration'))
 
-        self.service.process_video(input_file=video.video, resolutions=[240, 720], file_name='hls_video',
+        process_video_task.delay(input_file=video.video.name, resolutions=[240, 720], file_name='hls_video1',
                                    video_id=video.pk)
 
         return Response(status=status.HTTP_202_ACCEPTED)

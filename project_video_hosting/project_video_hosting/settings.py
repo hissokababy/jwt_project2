@@ -197,5 +197,5 @@ RABBITMQ_DEFAULT_USER = "rabbitmq"
 RABBITMQ_DEFAULT_PASS = "rabbitmq"
 
 
-CELERY_BROKER_URL = "redis://redis_video_hosting:6380/0"
-CELERY_RESULT_BACKEND = "redis://redis_video_hosting:6380/0"
+CELERY_BROKER_URL = "redis://redis:6379/1"
+CELERY_RESULT_BACKEND = "redis://redis:6379/1"
