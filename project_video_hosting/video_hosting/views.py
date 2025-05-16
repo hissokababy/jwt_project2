@@ -1,3 +1,5 @@
+import os
+
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -17,13 +19,14 @@ class LoadVideoView(APIView):
         serializer = LoadVideoSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # video = self.service.create_video(user=request.user, 
-        #                                   title=serializer.validated_data.get('title'),
-        #                                   preview=serializer.validated_data.get('preview'), 
-        #                                   video=serializer.validated_data.get('video'),
-        #                                   duration=serializer.validated_data.get('duration'))
-        
-        self.service.process_video()
+        video = self.service.create_video(user=request.user, 
+                                          title=serializer.validated_data.get('title'),
+                                          preview=serializer.validated_data.get('preview'), 
+                                          video=serializer.validated_data.get('video'),
+                                          duration=serializer.validated_data.get('duration'))
+
+        self.service.process_video(input_file=video.video, resolutions=[240, 720], file_name='hls_video',
+                                   video_id=video.pk)
 
         return Response(status=status.HTTP_202_ACCEPTED)
     

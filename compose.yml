@@ -71,6 +71,15 @@ services:
 
   redis:
     image: redis:alpine
+
+  redis_video_hosting:
+    image: redis:alpine
+
+    command: --port 6380
+    ports:
+      - "6380:6380"
+
+
   celery:
     build: ./project_jwt/
     command: celery -A project_jwt worker -l info
@@ -78,6 +87,14 @@ services:
       - ./project_jwt/:/redis
     depends_on:
       - redis
+
+  celery_video_hosting:
+    build: ./project_video_hosting/
+    command: celery -A project_video_hosting worker -l info
+    volumes:
+      - ./project_video_hosting/:/redis_video_hosting
+    depends_on:
+      - redis_video_hosting
 
   celery-beat:
     build: ./project_jwt/

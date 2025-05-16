@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+
 # from dotenv import load_dotenv
 # load_dotenv('project_video_hosting/.env')
 
@@ -31,6 +32,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -43,7 +45,7 @@ INSTALLED_APPS = [
     
     'video_hosting',
     'broker',
-
+    'storages',
     'rest_framework',
     'drf_spectacular',
     'django_cleanup.apps.CleanupConfig',
@@ -195,13 +197,5 @@ RABBITMQ_DEFAULT_USER = "rabbitmq"
 RABBITMQ_DEFAULT_PASS = "rabbitmq"
 
 
-CELERY_BROKER_URL = "redis://redis:6379/0"
-CELERY_RESULT_BACKEND = "redis://redis:6379/0"
-CELERY_WORKER_TIME_INTERVAL = 300.0
-
-VIDEO_RESOLUTIONS = {
-    '360p': '640x360',
-    '480p': '854x480',
-    '720p': '1280x720',
-    '1080p': '1920x1080'
-}
+CELERY_BROKER_URL = "redis://redis_video_hosting:6380/0"
+CELERY_RESULT_BACKEND = "redis://redis_video_hosting:6380/0"

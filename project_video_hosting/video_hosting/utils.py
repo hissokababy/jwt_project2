@@ -1,26 +1,85 @@
-import ffmpeg
+import subprocess
 import os
 
-from project_video_hosting.settings import VIDEO_RESOLUTIONS
+from django.core.files.storage import default_storage
 
-def create_video_segments(video):
-    video = 'cool_magnus.mp4'
+from video_hosting.models import Video
 
-    resolutions = VIDEO_RESOLUTIONS
+S3_ENDPOINT_URL = os.getenv("S3_ENDPOINT_URL")
+storage = default_storage
 
-    for name, resolution in resolutions.items():
-        output_path = f'{name}.m3u8'
-        (
-            ffmpeg.output
-            .input(video)
-            .output(output_path,
-                    format='hls',
-                    hls_time=10,
-                    hls_playlist_type='vod',
-                    hls_segment_filename=f'{name}_%03d.ts',
-                    vf=f'scale={resolution}',
-                    **{'b:v': '2000k', 'maxrate': '2140k', 'bufsize': '3000k'}  # Example bitrate settings
-                )
-            .run()
-        )
+class VideoProcess:
+    def __init__(self):
+        pass
+
+    def create_hls(self, input_file: str, resolutions: list, file_name: str):
+        input_file = f'{S3_ENDPOINT_URL}/videos/{input_file}'
+
+        cmd = []
+
+        initial = [        
+            "ffmpeg",
+            "-i", input_file,
+            "-c:v", "libx264",
+            "-c:a", "aac",]
+
+        cmd.extend(initial)
+
+        var_stream_names = ["-var_stream_map"]
+        var_names = []
+        for index, resolution in enumerate(resolutions):
+            variant = [        
+            "-map",
+            "0:v:0",
+            "-map",
+            "0:a:0",
+            f"-filter:v:{index}", f"scale=w=-2:h={resolution}",
+            f"-crf:{index}", "23",]
+            cmd.extend(variant)
+            var_names.append(f'v:{index},a:{index},name:{resolution}')
+
+        map_names = [' '.join(var_names)]
+        var_stream_names.extend(map_names)
+
+        cmd.extend(var_stream_names)
+
+        common = [
+            "-preset", "veryfast",
+            "-f", "hls",
+            "-hls_playlist_type", "vod",
+            "-hls_time", "10",
+            "-hls_flags", "independent_segments",
+            "-hls_segment_type", "mpegts",
+            
+            "-master_pl_name", f"{file_name}_m.m3u8",
+            "-hls_segment_filename", f"./{file_name}/%v/{file_name}_%04d.ts",
+            
+            f"./{file_name}/%v/{file_name}.m3u8",
+            ]
+
+        cmd.extend(common)
+
+        print(cmd)
+        subprocess.run(cmd)
+
+        files = self.recursive_func(file_name)
+        
+        for file in files:
+            storage.bucket.upload_file(file, file)
+
+        return files[-1]
+        
+
+    def recursive_func(self, dir: str):
+        lst = []
+
+        for file in os.listdir(dir):
+            if os.path.isdir(f'{dir}/{file}'):
+                r = self.recursive_func(f'{dir}/{file}')
+                lst.extend(r)
+            
+            if os.path.isfile(f'{dir}/{file}'):
+                lst.append(f'{dir}/{file}')
+
+        return lst
 

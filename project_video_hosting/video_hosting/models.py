@@ -27,7 +27,7 @@ class Video(CommonInfo):
                                    verbose_name='Автор видео')
     title = models.CharField(max_length=255, verbose_name='Название видео')
     preview = models.ImageField(upload_to='videos/previews/', verbose_name='Обложка видео')
-    video = models.FileField(upload_to='videos/original_files/', verbose_name='Видео')
+    video = models.FileField(upload_to='videos/original_files/', verbose_name='Видео', null=True, blank=True)
     duration = models.DurationField(verbose_name='Длительность видео')
 
     processed = models.BooleanField(default=False, verbose_name='Обработано')
@@ -53,6 +53,5 @@ class VideoTracker(CommonInfo):
     class Meta:
         verbose_name = 'Просмотренное Видео'
         verbose_name_plural = 'Просмотренное Видео'
-
 
 

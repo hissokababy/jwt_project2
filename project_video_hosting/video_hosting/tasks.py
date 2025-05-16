@@ -1,10 +1,14 @@
-from project_video_hosting.celery import app
+# from project_video_hosting.celery import app
 
 from video_hosting.services.user import VideoHostingService
 
+from celery import shared_task
+import time
 
-@app.task
-def check() -> None:
-    service = VideoHostingService()
-    # service.check_task_date()
-
+@shared_task
+def process_video_task() -> None:
+    # service = VideoHostingService()
+    # service.process_video()
+    print('in task')
+    time.sleep(20)
+    print('task_done!')
