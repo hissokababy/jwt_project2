@@ -1,5 +1,7 @@
 from typing import IO
 
+from django.core.files.storage import default_storage
+
 from video_hosting.serializers import LoadVideoSerializer
 from video_hosting.models import User, Video
 from video_hosting.exeptions import InvalidVideoId
@@ -19,7 +21,6 @@ class VideoHostingService:
 
 
     ###### ---->>>>>   РАБОТА С ВИДЕО   <<<<<---- ######
-
     def create_video(self, user: User, title: str, preview: IO, video: IO, duration: int) -> Video:
         user = User.objects.get(pk=21)   # временно    
 
@@ -30,7 +31,7 @@ class VideoHostingService:
 
     def get_video(self, user_id: int, video_id: int) -> dict:
         try:
-            video = Video.objects.get(created_by=user_id, pk=video_id)
+            video = Video.objects.get(created_by=user_id, pk=video_id, processed=True)
 
             serializer = LoadVideoSerializer(video)
             return serializer.data
@@ -46,7 +47,19 @@ class VideoHostingService:
 
         video.master_playlist = master
         video.video.delete()
+        video.processed = True
         video.save()
 
+
+    def delete_video(self, video_id: int, user_id: int):
+        try:
+            video = Video.objects.get(created_by=user_id, pk=video_id, processed=True)
+        except Video.DoesNotExist:
+            raise InvalidVideoId
+        
+        dir = video.master_playlist.name.split('/')[0]
+        storage = default_storage
+        storage.bucket.objects.filter(Prefix=dir).delete()
+        video.delete()
     ###### ---->>>>>   РАБОТА С ВИДЕО   <<<<<---- ######
 

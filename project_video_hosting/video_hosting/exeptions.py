@@ -8,5 +8,5 @@ class InvalidUserId(APIException):
 
 class InvalidVideoId(APIException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    default_detail = ('invalid video id')
+    default_detail = ('Invalid video id or video is in process')
     default_code = 'invalid_video_id'

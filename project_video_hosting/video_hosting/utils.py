@@ -1,6 +1,8 @@
 import subprocess
 import os
 import shutil
+from random import sample
+from string import ascii_letters, digits
 
 
 from django.core.files.storage import default_storage
@@ -87,3 +89,8 @@ class VideoProcess:
 
         return lst
 
+
+def random_dir_name(length: int):
+    symbols = ascii_letters + digits
+    random_str = ''.join(sample(symbols, length))
+    return random_str
