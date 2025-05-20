@@ -7,3 +7,9 @@ class LoadVideoSerializer(serializers.Serializer):
     duration = serializers.DurationField()
     
     
+class MyVideoSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    preview = serializers.ImageField()
+    duration = serializers.DurationField()
+    
+    

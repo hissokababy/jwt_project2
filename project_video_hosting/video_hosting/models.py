@@ -13,7 +13,8 @@ class CommonInfo(models.Model):
 class User(CommonInfo):
     id = models.PositiveIntegerField(verbose_name='Ид пользователя', primary_key=True)
     is_active = models.BooleanField(verbose_name='Активный пользователь', default=True)
-
+    is_authenticated = models.BooleanField(verbose_name='Авторизованный пользователь', default=True)
+    
     def __str__(self):
         return f'Пользователь {self.id}'
     
@@ -29,8 +30,10 @@ class Video(CommonInfo):
     preview = models.ImageField(upload_to='videos/previews/', verbose_name='Обложка видео')
     video = models.FileField(upload_to='videos/original_files/', verbose_name='Видео', null=True, blank=True)
     duration = models.DurationField(verbose_name='Длительность видео')
+    hash = models.CharField(max_length=150, verbose_name='Хеш видео', null=True, blank=True)
 
     processed = models.BooleanField(default=False, verbose_name='Обработано')
+    hls_dir_name = models.CharField(max_length=50, verbose_name='Название директории HLS', blank=True, null=True)
     master_playlist = models.FileField(upload_to=f'videos/master_playlists/', verbose_name='Мастер плейлист', null=True)
 
     def __str__(self):

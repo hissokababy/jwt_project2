@@ -2,11 +2,11 @@ from typing import IO
 
 from django.core.files.storage import default_storage
 
-from video_hosting.serializers import LoadVideoSerializer
+from video_hosting.tokens import decode_access_token
+from video_hosting.serializers import MyVideoSerializer
 from video_hosting.models import User, Video
-from video_hosting.exeptions import InvalidVideoId
+from video_hosting.exeptions import InvalidUserId, InvalidVideoId
 from video_hosting.utils import VideoProcess
-
 
 class VideoHostingService:
     def __init__(self):
@@ -21,11 +21,12 @@ class VideoHostingService:
 
 
     ###### ---->>>>>   РАБОТА С ВИДЕО   <<<<<---- ######
-    def create_video(self, user: User, title: str, preview: IO, video: IO, duration: int) -> Video:
-        user = User.objects.get(pk=21)   # временно    
+    def create_video(self, user_id: int, title: str, preview: IO, video_file: IO, duration: int) -> Video:
+        user = self.get_user(user_id=user_id)
 
-        video = Video.objects.create(created_by=user, title=title, 
-                                     preview=preview, video=video, duration=duration)
+        video = Video.objects.create(created_by=user, title=title, duration=duration, preview=preview, 
+                                        hls_dir_name=self.generate_dir_name(length=15), video=video_file)
+        video_hash = self.check_video_hash(video_file=video_file, video=video)
 
         return video
 
@@ -33,7 +34,7 @@ class VideoHostingService:
         try:
             video = Video.objects.get(created_by=user_id, pk=video_id, processed=True)
 
-            serializer = LoadVideoSerializer(video)
+            serializer = MyVideoSerializer(video)
             return serializer.data
         except Video.DoesNotExist:
             raise InvalidVideoId
@@ -57,9 +58,55 @@ class VideoHostingService:
         except Video.DoesNotExist:
             raise InvalidVideoId
         
-        dir = video.master_playlist.name.split('/')[0]
+        dir = video.hls_dir_name
         storage = default_storage
         storage.bucket.objects.filter(Prefix=dir).delete()
         video.delete()
-    ###### ---->>>>>   РАБОТА С ВИДЕО   <<<<<---- ######
+    
 
+    def generate_dir_name(self, length: int) -> str:
+        generated = self.video_process.random_dir_name(length)
+        video = Video.objects.filter(hls_dir_name=generated).exists()
+
+        if video:
+            self.generate_dir_name(length=length)
+        else:
+            return generated
+        
+    
+    def check_video_hash(self, video_file: str, video: Video) -> str:
+        video_hash = self.video_process.create_video_hash(video_file=video_file)
+        try:
+            existing_video = Video.objects.get(hash=video_hash)
+            print('est video s takim hash')
+            video.hls_dir_name = existing_video.hls_dir_name
+            video.master_playlist = existing_video.master_playlist
+            # video.hash = existing_video.hash  
+
+            video.save()
+
+        except Video.DoesNotExist:
+            video.hash = video_hash
+            video.save()
+            return hash
+        
+   ###### ---->>>>>   РАБОТА С ВИДЕО   <<<<<---- ######
+
+
+    ###### ---->>>>>   ВАЛИДАЦИЯ JWT ТОКЕНА ПОЛЬЗОВАТЕЛЯ  <<<<<---- ######
+    def validate_access_token(self, access_token: str) -> User:
+        decoded = decode_access_token(access_token)
+
+        user = self.get_user(user_id=decoded['user_id'])
+                
+        return user
+    
+
+    def get_user(self, user_id: int) -> User:
+        try:
+            user = User.objects.get(pk=user_id)
+            if user.is_active:
+                return user
+        except User.DoesNotExist:
+            raise InvalidUserId('Invalid token')
+    ###### ---->>>>>   ВАЛИДАЦИЯ JWT ТОКЕНА ПОЛЬЗОВАТЕЛЯ  <<<<<---- ######

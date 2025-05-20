@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+import pem
+
 # from dotenv import load_dotenv
 # load_dotenv('project_video_hosting/.env')
 
@@ -128,15 +130,15 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.IsAuthenticated'
     ],
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        # 'jwtapp.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        'video_hosting.authentication.JWTAuthentication',
     ]
 }
 
@@ -191,6 +193,21 @@ AWS_QUERYSTRING_AUTH = True
 AWS_S3_FILE_OVERWRITE = False
 AWS_S3_URL_PROTOCOL = "http:"
 AWS_S3_CUSTOM_DOMAIN = "localhost:9000/videos"
+
+
+TOKEN_AUTH_HEADER = 'Bearer'
+
+
+ACCESS_TOKEN_SECRET_KEY = os.getenv('ACCESS_TOKEN_SECRET_KEY')
+REFRESH_TOKEN_SECRET_KEY = os.getenv('REFRESH_TOKEN_SECRET_KEY')
+
+HS256_ALGORITHM = 'HS256'
+RS256_ALGORITHM = 'RS256'
+
+ALGORITHMS = HS256_ALGORITHM
+
+ACCESS_PRIVATE_KEY = pem.parse_file("private_key.pem")[0]
+ACCESS_PUBLIC_KEY = pem.parse_file("public_key.pem")[0]
 
 
 RABBITMQ_DEFAULT_USER = "rabbitmq"

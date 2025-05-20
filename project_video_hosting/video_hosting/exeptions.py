@@ -10,3 +10,10 @@ class InvalidVideoId(APIException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     default_detail = ('Invalid video id or video is in process')
     default_code = 'invalid_video_id'
+
+
+class InvalidTokenExeption(APIException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    default_detail = ('Invalid token')
+    default_code = 'invalid_token'
+
